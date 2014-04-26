@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>江苏大学360°街景</title>
+
+  <meta name="Keywords" content="3d,webgl,globe,map,interactive">
+  <meta name="description" content="Demo page for tellurian.js, an interacive 3d globe based on WebGL.">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width">
+
+  <script type="text/javascript" src="js/3rd-party/three.min.js"></script>
+  <script type="text/javascript" src="js/3rd-party/zepto.js"></script>
+  
+  <script type="text/javascript" src="js/streetview.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+
+</head>
+<body>
+  <header>
+    <h1>江苏大学360°街景</h1>
+    <h2>基于HTML5 WebGL 构建</h2>
+  </header>
+  
+  <div id="control">
+    <button id="panLeft">←</button>
+    <button id="zoomIn">＋</button>
+    <button id="zoomOut">－</button>
+    <button id="panRight">→</button>
+  </div>
+  
+  <nav>
+    <a href="#gate"><img src="img/gate-s.jpg"><span>正门</span></a>
+    <a href="#library"><img src="img/library-s.jpg"><span>图书馆</span></a>
+    <a href="#exibition-hall"><img src="img/exibition-hall-s.jpg"><span>校史馆</span></a>
+    <a href="#gym"><img src="img/gym-s.jpg"><span>体育馆</span></a>
+    <a href="#arts"><img src="img/arts-s.jpg"><span>艺术学院</span></a>
+    <a href="#medical-tech"><img src="img/medical-tech-s.jpg"><span>基础医学院</span></a>
+    <a href="#medicine"><img src="img/medicine-s.jpg"><span>药学院</span></a>
+    <a href="#clinical"><img src="img/clinical-s.jpg"><span>临床医学院</span></a>
+  </nav>
+  
+  <div id="viewport">
+    <p class="webgl-error">对不起，您的浏览器不支持WebGL</p>
+  </div>
+  
+  <div class="spinner"></div>
+
+  <script type="text/javascript">
+    (function() {
+      var imgPath = function(url) {
+        var file = hash(url);
+        file = file || 'gate';
+        return ['img/', file, '.jpg'].join('');
+      }
+      
+      var hash = function(url) {
+        return (url.hash || '#').substr(1);
+      }
+      
+      var streetView = street('#viewport').view(imgPath(location));
+      $('nav').on('click', 'a', function(e){
+        streetView.toggle(imgPath(this));
+        return false;
+      });
+      
+      var interval;
+      $('#control').on('mousedown', 'button', function(e) {
+         clearInterval(interval);
+         streetView[this.id] && (interval = setInterval(streetView[this.id], 100));
+         console.log(interval);
+      });
+      
+      $.each(['up', 'out', 'leave'], function(i, e){
+        $('#control').on('mouse' + e, 'button', function(e) {
+          clearInterval(interval);
+        });
+      });
+    })()
+  </script>
+
+  <footer></footer>
+</body>
+</html>
