@@ -111,10 +111,6 @@ var StreetView = function (container) {
     // WEB-GL
     var camera, renderer, scene;
     var vector3, mesh;
-    
-    var canvas = document.createElement("canvas"),
-        context = canvas.getContext("2d"),
-        texture;
 
     var overRenderer;
     var curZoomSpeed = 0, zoomSpeed = 50;
@@ -130,9 +126,14 @@ var StreetView = function (container) {
     var initialized = false;
     var self = this; // instance
     
+    var canvas = document.createElement("canvas"),
+        canvasContext = canvas.getContext("2d"),
+        texture;
+    
     function toggle(image) {
         this.image = image;
         var img = new Image(), ratio = 2;
+        canvasContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         img.onload = function() {
             // TODO: 处理不同长宽比、尺寸的图片
             var w, h;
@@ -141,8 +142,10 @@ var StreetView = function (container) {
             } else {
                 
             }
-            context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            context.drawImage(img, 0, (CANVAS_HEIGHT - img.height) / 2, CANVAS_WIDTH, img.height);
+        
+            canvasContext.translate(CANVAS_WIDTH, 0);
+            canvasContext.scale(-1, 1);
+            canvasContext.drawImage(img, 0, (CANVAS_HEIGHT - img.height) / 2, CANVAS_WIDTH, img.height);
             texture.needsUpdate = true;
         }
         img.src = image;

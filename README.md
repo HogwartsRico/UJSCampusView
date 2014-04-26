@@ -1,7 +1,7 @@
 UJSCampusView - 江大街景
 ===
 
-![截图](https://raw.githubusercontent.com/ChiChou/UJSCampusView/remote/UJSCampusView.png)
+![截图](https://raw.githubusercontent.com/ChiChou/UJSCampusView/master/UJSCampusView.jpg)
 
 这是一个基于 [THREE.js](http://threejs.org/) 的仿 Google 街景程序，需要浏览器和显卡支持 WEBGL。
 
