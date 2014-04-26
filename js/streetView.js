@@ -42,12 +42,12 @@ var Detector = {
             element.style[rule] = style[rule];
         }
 
-        var cause = window.WebGLRenderingContext ? "ÏÔ¿¨" : "ä¯ÀÀÆ÷";
+        var cause = window.WebGLRenderingContext ? "æ˜¾å¡" : "æµè§ˆå™¨";
 
         element.innerHTML = [
-            '¶Ô²»Æğ£¬ÄúµÄ ', cause, '²»Ö§³Ö',
-            '<a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">WebGL</a>¡£<br />',
-            '¸ü¶àÏêÇéÇë²Î¿¼<a href="http://get.webgl.org/" style="color:#000">ÕâÀï</a>¡£'
+            'å¯¹ä¸èµ·ï¼Œæ‚¨çš„ ', cause, 'ä¸æ”¯æŒ',
+            '<a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">WebGL</a>ã€‚<br />',
+            'æ›´å¤šè¯¦æƒ…è¯·å‚è€ƒ<a href="http://get.webgl.org/" style="color:#000">è¿™é‡Œ</a>ã€‚'
         ].join('');
 
         return element;
@@ -134,7 +134,7 @@ var StreetView = function (container) {
         this.image = image;
         var img = new Image(), ratio = 2;
         img.onload = function() {
-            // TODO: ´¦Àí²»Í¬³¤¿í±È¡¢³ß´çµÄÍ¼Æ¬
+            // TODO: å¤„ç†ä¸åŒé•¿å®½æ¯”ã€å°ºå¯¸çš„å›¾ç‰‡
             var w, h;
             if(img.width / img.height > ratio) {
                 
