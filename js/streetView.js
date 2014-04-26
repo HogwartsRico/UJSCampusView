@@ -134,7 +134,7 @@ var StreetView = function (container) {
         this.image = image;
         var img = new Image(), ratio = 2;
         img.onload = function() {
-            // TODO: 处理不同长宽比的图片
+            // TODO: 处理不同长宽比、尺寸的图片
             var w, h;
             if(img.width / img.height > ratio) {
                 

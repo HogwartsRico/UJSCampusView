@@ -58,7 +58,7 @@
       }
       
       var streetView = street('#viewport').view(imgPath(location));
-      $('nav').on('click', 'a', function(e){
+      $('nav').on('click', 'a', function(e) {
         streetView.toggle(imgPath(this));
         return false;
       });
