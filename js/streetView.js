@@ -230,8 +230,8 @@ var StreetView = function (container) {
 
         var zoomDamp = distance / 100;
 
-        target.x = targetOnDown.x + (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
-        target.y = targetOnDown.y + (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
+        target.x = targetOnDown.x - (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
+        target.y = targetOnDown.y - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
 
         target.y = target.y > Y_RANGE ? Y_RANGE : target.y;
         target.y = target.y < -Y_RANGE ? -Y_RANGE : target.y;
