@@ -135,17 +135,11 @@ var StreetView = function (container) {
         var img = new Image(), ratio = 2;
         canvasContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         img.onload = function() {
-            // TODO: 处理不同长宽比、尺寸的图片
-            var w, h;
-            if(img.width / img.height > ratio) {
-                
-            } else {
-                
-            }
-        
+            var h = img.height * CANVAS_WIDTH / img.width;
+            // flip
             canvasContext.translate(CANVAS_WIDTH, 0);
             canvasContext.scale(-1, 1);
-            canvasContext.drawImage(img, 0, (CANVAS_HEIGHT - img.height) / 2, CANVAS_WIDTH, img.height);
+            canvasContext.drawImage(img, 0, (CANVAS_HEIGHT - h) / 2, CANVAS_WIDTH, h);
             texture.needsUpdate = true;
         }
         img.src = image;
@@ -231,10 +225,10 @@ var StreetView = function (container) {
         mouse.x = -event.clientX;
         mouse.y = event.clientY;
 
-        var zoomDamp = distance / 100;
+        var zoomDamp = distance / 10000;
 
-        target.x = targetOnDown.x - (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
-        target.y = targetOnDown.y - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
+        target.x = targetOnDown.x - (mouse.x - mouseOnDown.x) * zoomDamp;
+        target.y = targetOnDown.y - (mouse.y - mouseOnDown.y) * zoomDamp;
 
         target.y = target.y > Y_RANGE ? Y_RANGE : target.y;
         target.y = target.y < -Y_RANGE ? -Y_RANGE : target.y;
@@ -265,6 +259,7 @@ var StreetView = function (container) {
     this.zoomOut = function(){return zoom(-100), this};
     
     var pan = function(offset) {
+      //todo: 修改速度算法
       return target.x += offset * 0.005 * distance / 100, this;
     }
     this.panLeft = function(){return pan(2);}
