@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   
-  <title>江苏大学360°街景</title>
+  <title>江苏大学校园全景</title>
 
   <meta name="Keywords" content="3d,webgl,globe,map,interactive">
   <meta name="description" content="Demo page for tellurian.js, an interacive 3d globe based on WebGL.">
@@ -19,15 +19,24 @@
 </head>
 <body>
   <header>
-    <h1>江苏大学360°街景</h1>
-    <h2>基于HTML5 WebGL 构建</h2>
+    <h1>江苏大学校园全景</h1>
+    <p>基于HTML5 WebGL 构建，图片素材来自江苏大<br>
+      学官方网站，任何形式的商业使用与本演示程序<br>
+      作者无关。推荐使用Chrome浏览器查看。</p>
+    <p>
+      <a href="https://github.com/chichou/ujscampusview">源代码</a>&nbsp;
+      <a href="http://chichou.0ginr.com/blog/739">联系作者</a>
+    </p>
   </header>
   
   <div id="control">
-    <button id="panLeft">←</button>
-    <button id="zoomIn">＋</button>
-    <button id="zoomOut">－</button>
-    <button id="panRight">→</button>
+    <span class="press">
+      <button id="panLeft"><i class="iconfont left"></i></button>
+      <button id="panRight"><i class="iconfont right"></i></button>
+      <button id="zoomIn"><i class="iconfont zoomin"></i></button>
+      <button id="zoomOut"><i class="iconfont zoomout"></i></button>
+    </span>
+    <button id="fullscreen"><i class="iconfont fullscreen"></i></button>
   </div>
   
   <nav>
@@ -59,21 +68,27 @@
         return (url.hash || '#').substr(1);
       }
       
-      var streetView = street('#viewport').view(imgPath(location));
+      var streetView = street('#viewport').view(imgPath(location)).on('ImageLoad', function(){
+        //loading
+      }).on('ImageLoadFinished', function(){
+        //finished
+      });
       $('nav').on('click', 'a', function(e) {
         streetView.toggle(imgPath(this));
         return false;
       });
-      
+
+      $('#fullscreen').on('click', function(e) {
+        streetView.toggleFullScreen(document.documentElement);
+      });
       var interval;
-      $('#control').on('mousedown', 'button', function(e) {
+      $('#control .press').on('mousedown', 'button', function(e) {
          clearInterval(interval);
          streetView[this.id] && (interval = setInterval(streetView[this.id], 100));
-         console.log(interval);
       });
       
       $.each(['up', 'out', 'leave'], function(i, e){
-        $('#control').on('mouse' + e, 'button', function(e) {
+        $('#control .press').on('mouse' + e, 'button', function(e) {
           clearInterval(interval);
         });
       });

@@ -120,8 +120,8 @@ var StreetView = function (container) {
         target = { x: Math.PI * 3 / 2, y: 0},
         targetOnDown = { x: 0, y: 0 };
 
-    var distance = 0, distanceTarget = 0;
-    var Y_RANGE = Math.PI / 12, RADIUS = 200, CANVAS_WIDTH = 3200, CANVAS_HEIGHT = 1600;
+    var distance = 100, distanceTarget = 0;
+    var Y_RANGE = Math.PI / 12, RADIUS = 400, CANVAS_WIDTH = 3200, CANVAS_HEIGHT = 1600;
 
     var initialized = false;
     var self = this; // instance
@@ -130,13 +130,15 @@ var StreetView = function (container) {
         canvasContext = canvas.getContext("2d"),
         texture;
     
-    
     function toggle(image) {
-        this.image = image;
+        self.onImageLoad();
+        self.image = image;
         var img = new Image(), ratio = 2;
         canvasContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         
         img.onload = function() {
+            self.onImageLoadFinished();
+            
             var h = img.height * CANVAS_WIDTH / img.width;
             canvasContext.save();
             canvasContext.translate(CANVAS_WIDTH, 0);
@@ -144,18 +146,60 @@ var StreetView = function (container) {
             canvasContext.drawImage(img, 0, (CANVAS_HEIGHT - h) / 2, CANVAS_WIDTH, h);
             canvasContext.restore();            
             texture.needsUpdate = true;
+            
+            self.onImageDrawFinished();
         }
         img.src = image;
     }
     this.toggle = toggle;
     
-    function view(image) {
+    // auto spin
+    var spinInterval;
+    this.spin = function() { this.rotating = true; }
+    this.stop = function() { this.rotating = false; }
+    function rotate() {
+        if(self.rotating && !overRenderer) self.panRight();
+    }
+    
+    // run
+    this.view = function(image) {
         init();
         toggle(image)
         animate();
+        self.rotating = false;
+        setInterval(rotate, 100);
         return this;
+    };
+    
+    // toggle fullscreen
+    this.toggleFullScreen = function(e) {
+        var e = e || container;
+        
+        if(e.fullscreenElement || 
+          e.mozFullScreenElement ||
+          e.webkitFullscreenElement ||
+          e.msFullscreenElement) {
+          
+            (e.exitFullscreen ||
+            e.webkitExitFullscreen ||
+            e.mozCancelFullScreen ||
+            e.msExitFullscreen || function(){}).call(e);
+        } else {
+            (e.requestFullScreen ||
+            e.webkitRequestFullScreen||
+            e.mozRequestFullScreen || this.onFullScreenFailed).call(e);
+        }
     }
-    this.view = view;
+    
+    // events
+    var events = 'ImageLoad,ImageDrawFinished,ImageLoadFinished,FullscreenFailed'.split(',');
+    this.on = this.attach = function(event, handler) {
+        self['on' + event] = handler || function(){};
+        return self;
+    }    
+    for(var i=0; i<events.length; i++) {
+        this.on(events[i]);
+    }
     
     function init() {
         initialized = true;
@@ -166,7 +210,6 @@ var StreetView = function (container) {
 
         canvas.width = CANVAS_WIDTH, canvas.height = CANVAS_HEIGHT;
 
-        
         texture || (texture = new THREE.Texture(canvas));
         
         camera = new THREE.PerspectiveCamera(45, w / h, 100, 1e4);
@@ -321,6 +364,7 @@ var StreetView = function (container) {
         
         renderer.clear();
         renderer.render(scene, camera);
+        
         requestAnimationFrame(animate);
     }
 
