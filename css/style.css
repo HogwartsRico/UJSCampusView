@@ -1,4 +1,4 @@
-body{margin:0;background:#000;overflow:hidden}
+body{margin:0;background:#000;overflow:hidden;-webkit-user-select:none}
 header,nav,#control{position:absolute;z-index:20}
 header{position:absolute;color:#fff;text-shadow:1px 1px 2px #000;background:rgba(0,0,0,.2);
   box-shadow:0 0 2px 1px rgba(0, 0, 0, 0.22);font-size:13px;top:10px;left:10px;width:320px;
