@@ -130,16 +130,19 @@ var StreetView = function (container) {
         canvasContext = canvas.getContext("2d"),
         texture;
     
+    
     function toggle(image) {
         this.image = image;
         var img = new Image(), ratio = 2;
         canvasContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        
         img.onload = function() {
             var h = img.height * CANVAS_WIDTH / img.width;
-            // flip
+            canvasContext.save();
             canvasContext.translate(CANVAS_WIDTH, 0);
             canvasContext.scale(-1, 1);
             canvasContext.drawImage(img, 0, (CANVAS_HEIGHT - h) / 2, CANVAS_WIDTH, h);
+            canvasContext.restore();            
             texture.needsUpdate = true;
         }
         img.src = image;
@@ -162,6 +165,8 @@ var StreetView = function (container) {
             h = container.offsetHeight || window.innerHeight;
 
         canvas.width = CANVAS_WIDTH, canvas.height = CANVAS_HEIGHT;
+
+        
         texture || (texture = new THREE.Texture(canvas));
         
         camera = new THREE.PerspectiveCamera(45, w / h, 100, 1e4);
@@ -299,10 +304,9 @@ var StreetView = function (container) {
     }
 
     function animate() {
-        //webgl
-
         zoom(curZoomSpeed);
 
+        // static
         rotation.x += (target.x - rotation.x) * 0.1;
         rotation.y += (target.y - rotation.y) * 0.1;
         distance += (distanceTarget - distance) * 0.3;
@@ -314,7 +318,7 @@ var StreetView = function (container) {
         camera.lookAt(scene.position);
 
         vector3.copy(camera.position);
-
+        
         renderer.clear();
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
