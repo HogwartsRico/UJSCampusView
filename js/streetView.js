@@ -170,10 +170,20 @@ var StreetView = function (container) {
                 canvasContext.fillRect(0, 0, canvas.width, top);
                 
                 // footer
-                imageData = canvasContext.getImageData(0, canvas.height - top - 1, canvas.width, 1);
+                imageData = canvasContext.getImageData(0, top + h - 1, canvas.width, 1);
                 contextProcessor.putImageData(imageData, 0, 0);
                 canvasContext.fillStyle = canvasContext.createPattern(canvasProcessor, 'repeat');
-                canvasContext.fillRect(0, canvas.height - top, canvas.width, top);
+                canvasContext.fillRect(0, canvas.height - top - 1, canvas.width, top);
+                
+                // gradient overlay
+                
+                var gradient = canvasContext.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, "#fff");
+                gradient.addColorStop(top / canvas.height, "rgba(255,255,255,0)");
+                gradient.addColorStop(1 - top / canvas.height, "rgba(255,255,255,0)");
+                gradient.addColorStop(1, "#fff");
+                canvasContext.fillStyle = gradient;
+                canvasContext.fillRect(0, 0, canvas.width, canvas.height);
 
                 canvasProcessor = null;
             }
