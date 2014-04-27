@@ -45,7 +45,7 @@ var Detector = {
         var cause = window.WebGLRenderingContext ? "显卡" : "浏览器";
 
         element.innerHTML = [
-            '对不起，您的 ', cause, '不支持',
+            '对不起，您的', cause, '不支持',
             '<a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">WebGL</a>。<br />',
             '更多详情请参考<a href="http://get.webgl.org/" style="color:#000">这里</a>。'
         ].join('');
@@ -111,6 +111,7 @@ var StreetView = function (container) {
     // WEB-GL
     var camera, renderer, scene;
     var vector3, mesh;
+    var ORIGIN = new THREE.Vector3;
 
     var overRenderer;
     var curZoomSpeed = 0, zoomSpeed = 50;
@@ -120,8 +121,8 @@ var StreetView = function (container) {
         target = { x: Math.PI * 3 / 2, y: 0},
         targetOnDown = { x: 0, y: 0 };
 
-    var distance = 100, distanceTarget = 0;
-    var Y_RANGE = Math.PI / 12, RADIUS = 400, CANVAS_WIDTH = 3200, CANVAS_HEIGHT = 1600;
+    var yRange = Math.PI / 2, RADIUS = 1000;
+    var distance = 0, distanceTarget = RADIUS / 2;
 
     var initialized = false;
     var self = this; // instance
@@ -134,17 +135,49 @@ var StreetView = function (container) {
         self.onImageLoad();
         self.image = image;
         var img = new Image(), ratio = 2;
-        canvasContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
         
         img.onload = function() {
             self.onImageLoadFinished();
+            var ratio = img.width / img.height;
             
-            var h = img.height * CANVAS_WIDTH / img.width;
+            // var maxWidth = screen.width * 2;
+            canvas.width = img.width > 4096 ? 4096 : img.width;
+            canvas.height = canvas.width / 2;
+            
+            var h = (canvas.width / ratio) >> 0, top = (canvas.height - h) >> 1;
             canvasContext.save();
-            canvasContext.translate(CANVAS_WIDTH, 0);
+            canvasContext.translate(canvas.width, 0);
             canvasContext.scale(-1, 1);
-            canvasContext.drawImage(img, 0, (CANVAS_HEIGHT - h) / 2, CANVAS_WIDTH, h);
-            canvasContext.restore();            
+            // canvasContext.fillStyle = '#fff';
+            // canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+            canvasContext.drawImage(img, 0, top, canvas.width, h);
+            canvasContext.restore();
+            if(ratio > 2) {
+                var canvasProcessor = document.createElement('canvas'),
+                    contextProcessor = canvasProcessor.getContext("2d"),
+                    imageData;
+                
+                canvasProcessor.width = canvas.width;
+                canvasProcessor.height = 1;
+
+                // header
+                imageData = canvasContext.getImageData(0, top, canvas.width, 1);
+                contextProcessor.putImageData(imageData, 0, 0);
+                canvasContext.putImageData(imageData, 0, 0);
+                
+                canvasContext.fillStyle = canvasContext.createPattern(canvasProcessor, 'repeat');
+                canvasContext.fillRect(0, 0, canvas.width, top);
+                
+                // footer
+                imageData = canvasContext.getImageData(0, canvas.height - top - 1, canvas.width, 1);
+                contextProcessor.putImageData(imageData, 0, 0);
+                canvasContext.fillStyle = canvasContext.createPattern(canvasProcessor, 'repeat');
+                canvasContext.fillRect(0, canvas.height - top, canvas.width, top);
+
+                canvasProcessor = null;
+            }
+            
             texture.needsUpdate = true;
             
             self.onImageDrawFinished();
@@ -208,12 +241,12 @@ var StreetView = function (container) {
             w = container.offsetWidth || window.innerWidth,
             h = container.offsetHeight || window.innerHeight;
 
-        canvas.width = CANVAS_WIDTH, canvas.height = CANVAS_HEIGHT;
+        canvas.width = screen.height * 2, canvas.height = screen.height;
 
         texture || (texture = new THREE.Texture(canvas));
         
-        camera = new THREE.PerspectiveCamera(45, w / h, 100, 1e4);
-        camera.position.z = 0;
+        camera = new THREE.PerspectiveCamera(30, w / h, RADIUS, RADIUS);
+        camera.position.set(0, 0, 0);
 
         vector3 = new THREE.Vector3;
         scene = new THREE.Scene;
@@ -273,13 +306,13 @@ var StreetView = function (container) {
         mouse.x = -event.clientX;
         mouse.y = event.clientY;
 
-        var zoomDamp = distance / 10000;
+        var zoomDamp = Math.log(distance) / 1e3;
 
         target.x = targetOnDown.x - (mouse.x - mouseOnDown.x) * zoomDamp;
         target.y = targetOnDown.y - (mouse.y - mouseOnDown.y) * zoomDamp;
 
-        target.y = target.y > Y_RANGE ? Y_RANGE : target.y;
-        target.y = target.y < -Y_RANGE ? -Y_RANGE : target.y;
+        target.y = target.y > yRange ? yRange : target.y;
+        target.y = target.y < -yRange ? -yRange : target.y;
     }
 
     function onMouseUp(event) {
@@ -307,11 +340,10 @@ var StreetView = function (container) {
     this.zoomOut = function(){return zoom(-100), this};
     
     var pan = function(offset) {
-      //todo: 修改速度算法
-      return target.x += offset * 0.005 * distance / 100, this;
+      return target.x += offset * Math.log(distance) / 256, this;
     }
-    this.panLeft = function(){return pan(2);}
-    this.panRight = function(){return pan(-2);}
+    this.panLeft = function(){return pan(1);}
+    this.panRight = function(){return pan(-1);}
     
     function onDocumentKeyDown(event) {
         var prevent = true;
@@ -342,13 +374,14 @@ var StreetView = function (container) {
 
     function zoom(delta) {
         distanceTarget -= delta;
-        distanceTarget = distanceTarget > 500 ? 500 : distanceTarget;
-        distanceTarget = distanceTarget < 20 ? 20 : distanceTarget;
+        distanceTarget = distanceTarget > RADIUS ? RADIUS : distanceTarget;
+        distanceTarget = distanceTarget < 10 ? 10 : distanceTarget;
     }
 
     function animate() {
         zoom(curZoomSpeed);
 
+        window.target = target;
         // static
         rotation.x += (target.x - rotation.x) * 0.1;
         rotation.y += (target.y - rotation.y) * 0.1;
@@ -358,9 +391,9 @@ var StreetView = function (container) {
         camera.position.y = distance * Math.sin(rotation.y);
         camera.position.z = distance * Math.cos(rotation.x) * Math.cos(rotation.y);
 
-        camera.lookAt(scene.position);
+        camera.lookAt(ORIGIN);
 
-        vector3.copy(camera.position);
+        // vector3.copy(camera.position);
         
         renderer.clear();
         renderer.render(scene, camera);

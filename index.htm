@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   
   <title>江苏大学校园全景</title>
-
-  <meta name="Keywords" content="3d,webgl,globe,map,interactive">
-  <meta name="description" content="Demo page for tellurian.js, an interacive 3d globe based on WebGL.">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width">
 
@@ -19,25 +16,16 @@
 </head>
 <body>
   <header>
-    <h1>江苏大学校园全景</h1>
-    <p>基于HTML5 WebGL 构建，图片素材来自江苏大<br>
-      学官方网站，任何形式的商业使用与本演示程序<br>
-      作者无关。推荐使用Chrome浏览器查看。</p>
-    <p>
-      <a href="https://github.com/chichou/ujscampusview">源代码</a>&nbsp;
-      <a href="http://chichou.0ginr.com/blog/739">联系作者</a>
-    </p>
+    <article>
+      <h1><i class="iconfont tag"></i> 江苏大学校园全景</h1>
+      <p>基于HTML5 WebGL 构建，图片素材来自江苏大学官方网站，
+      任何形式的商业使用与本演示程序作者无关。为取得最佳效果，推荐使用Chrome浏览器查看。</p>
+      <p>
+        <a href="https://github.com/chichou/ujscampusview">源代码</a>&nbsp;
+        <a href="http://chichou.0ginr.com/blog/739">关于</a>
+      </p>
+    </article>
   </header>
-  
-  <div id="control">
-    <span class="press">
-      <button id="panLeft"><i class="iconfont left"></i></button>
-      <button id="panRight"><i class="iconfont right"></i></button>
-      <button id="zoomIn"><i class="iconfont zoomin"></i></button>
-      <button id="zoomOut"><i class="iconfont zoomout"></i></button>
-    </span>
-    <button id="fullscreen"><i class="iconfont fullscreen"></i></button>
-  </div>
   
   <nav>
     <a href="#gate"><img src="img/gate-s.jpg"><span>正门</span></a>
@@ -49,6 +37,16 @@
     <a href="#medicine"><img src="img/medicine-s.jpg"><span>药学院</span></a>
     <a href="#clinical"><img src="img/clinical-s.jpg"><span>临床医学院</span></a>
   </nav>
+  
+  <div id="control">
+    <span class="press">
+      <button id="panLeft"><i class="iconfont left"></i></button>
+      <button id="panRight"><i class="iconfont right"></i></button>
+      <button id="zoomIn"><i class="iconfont zoomin"></i></button>
+      <button id="zoomOut"><i class="iconfont zoomout"></i></button>
+    </span>
+    <button id="fullscreen"><i class="iconfont fullscreen"></i></button>
+  </div>
   
   <div id="viewport">
     <p class="webgl-error">对不起，您的浏览器不支持WebGL</p>
@@ -75,7 +73,6 @@
       });
       $('nav').on('click', 'a', function(e) {
         streetView.toggle(imgPath(this));
-        return false;
       });
 
       $('#fullscreen').on('click', function(e) {
