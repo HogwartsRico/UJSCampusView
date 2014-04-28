@@ -37,3 +37,12 @@ UJSCampusView - 江大街景
     * 拉远 `streetView.zoomOut()`
     * 左移 `streetView.panLeft()`
     * 右移 `streetView.panRight()`
+
+###事件
+
+使用 `streetView.on('event', function(){/* handler here */})` 附加事件监听函数。
+
+* onImageLoad 纹理图片开始下载
+* onImageLoadFinished 纹理图片下载完成
+* onImageDrawFinished 纹理图片渲染完成
+* onImageLoadError 图片下载失败

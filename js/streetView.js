@@ -241,7 +241,8 @@ var StreetView = function (container) {
     // events
     var events = 'ImageLoad,ImageDrawFinished,ImageLoadFinished,ImageLoadError,FullscreenFailed'.split(',');
     this.on = this.attach = function(event, handler) {
-        return handler ? (self['on' + event] = handler) : (handler && handler()), self;
+        assert(events.indexOf(event) > -1, "Unsupported event.");
+        return self['on' + event] = handler || function(){}, self;
     }
     // assign empty handler;
     for(var i=0; i<events.length; i++) {
