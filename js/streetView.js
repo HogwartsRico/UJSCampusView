@@ -26,7 +26,7 @@ var Detector = {
         var element = document.createElement('div');
         element.id = id;
 
-        var style = {
+        var css = {
             fontFamily: 'monospace',
             fontSize: '13px',
             fontWeight: 'normal',
@@ -38,8 +38,8 @@ var Detector = {
             margin: '5em auto 0'
         };
 
-        for (var rule in style) {
-            element.style[rule] = style[rule];
+        for (var rule in css) {
+            element.style[rule] = css[rule];
         }
 
         var cause = window.WebGLRenderingContext ? "显卡" : "浏览器";
@@ -47,7 +47,7 @@ var Detector = {
         element.innerHTML = [
             '对不起，您的', cause, '不支持',
             '<a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">WebGL</a>。<br />',
-            '更多详情请参考<a href="http://get.webgl.org/" style="color:#000">这里</a>。'
+            '更多详情请参考<a href="http://get.webgl.org/" style="color:#09f">这里</a>。'
         ].join('');
 
         return element;
@@ -134,25 +134,35 @@ var StreetView = function (container) {
     function toggle(image) {
         self.onImageLoad();
         self.image = image;
-        var img = new Image(), ratio = 2;
-        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        var img = new Image, ratio = 2;
+        // canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        
+        img.onerror = function() {
+            self.onImageLoadError();
+            
+            canvasContext.fillStyle = "#09f";
+            canvasContext.font = "bold 40px Arial";
+            canvasContext.fillText("Failed to load Image.", canvas.width / 2, canvas.height / 2);
+            
+            // todo
+        };
         
         img.onload = function() {
             self.onImageLoadFinished();
             var ratio = img.width / img.height;
             
             // var maxWidth = screen.width * 2;
-            canvas.width = img.width > 4096 ? 4096 : img.width;
-            canvas.height = canvas.width / 2;
+            canvas.width = img.width > 4096 ? 4096 : (img.width | 1) - 1;
+            canvas.height = canvas.width >> 1;
             
             var h = (canvas.width / ratio) >> 0, top = (canvas.height - h) >> 1;
             canvasContext.save();
             canvasContext.translate(canvas.width, 0);
             canvasContext.scale(-1, 1);
-            // canvasContext.fillStyle = '#fff';
-            // canvasContext.fillRect(0, 0, canvas.width, canvas.height);
             canvasContext.drawImage(img, 0, top, canvas.width, h);
             canvasContext.restore();
+            
+            // fill the blank
             if(ratio > 2) {
                 var canvasProcessor = document.createElement('canvas'),
                     contextProcessor = canvasProcessor.getContext("2d"),
@@ -176,7 +186,7 @@ var StreetView = function (container) {
                 canvasContext.fillRect(0, canvas.height - top - 1, canvas.width, top);
                 
                 // gradient overlay
-                
+                // todo: rotate
                 var gradient = canvasContext.createLinearGradient(0, 0, 0, canvas.height);
                 gradient.addColorStop(0, "#fff");
                 gradient.addColorStop(top / canvas.height, "rgba(255,255,255,0)");
@@ -187,9 +197,8 @@ var StreetView = function (container) {
 
                 canvasProcessor = null;
             }
-            
             texture.needsUpdate = true;
-            
+            // fire the event
             self.onImageDrawFinished();
         }
         img.src = image;
@@ -215,33 +224,28 @@ var StreetView = function (container) {
     };
     
     // toggle fullscreen
-    this.toggleFullScreen = function(e) {
-        var e = e || container;
+    this.toggleFullScreen = function(context) {
+        var context = context || container;
+        var doc = document;
         
-        if(e.fullscreenElement || 
-          e.mozFullScreenElement ||
-          e.webkitFullscreenElement ||
-          e.msFullscreenElement) {
-          
-            (e.exitFullscreen ||
-            e.webkitExitFullscreen ||
-            e.mozCancelFullScreen ||
-            e.msExitFullscreen || function(){}).call(e);
+        if(doc.mozFullScreen || doc.webkitFullScreen) {
+            (doc.exitFullscreen || doc.webkitCancelFullScreen || doc.mozCancelFullScreen ||
+            doc.msExitFullscreen || function(){}).call(doc);
         } else {
-            (e.requestFullScreen ||
-            e.webkitRequestFullScreen||
-            e.mozRequestFullScreen || this.onFullScreenFailed).call(e);
+            (context.requestFullScreen ||
+            context.webkitRequestFullScreen||
+            context.mozRequestFullScreen || this.onFullScreenFailed).call(context);
         }
     }
     
     // events
-    var events = 'ImageLoad,ImageDrawFinished,ImageLoadFinished,FullscreenFailed'.split(',');
+    var events = 'ImageLoad,ImageDrawFinished,ImageLoadFinished,ImageLoadError,FullscreenFailed'.split(',');
     this.on = this.attach = function(event, handler) {
-        self['on' + event] = handler || function(){};
-        return self;
-    }    
+        return handler ? (self['on' + event] = handler) : (handler && handler()), self;
+    }
+    // assign empty handler;
     for(var i=0; i<events.length; i++) {
-        this.on(events[i]);
+        this.on(events[i], function(){});
     }
     
     function init() {
