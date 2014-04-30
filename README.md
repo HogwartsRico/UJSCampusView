@@ -5,6 +5,8 @@ UJSCampusView - 江大街景
 
 这是一个基于 [THREE.js](http://threejs.org/) 的仿 Google 街景程序，需要浏览器和显卡支持 WEBGL。
 
+[在线演示](http://chichou.github.io/UJSCampusView/demo "Live demo")
+
 本地测试
 ---
 **由于浏览器的安全策略，本地（网址为file:///）上不能加载图片纹理。**请使用nginX / Apache / IIS 等服务器发布到 localhost 后查看。
@@ -42,8 +44,6 @@ UJSCampusView - 江大街景
 toggle方法
 
 `streetView.toggle('img/new/path/to/texture.jpg')`
-
-
 
 * 镜头
     * 拉近 `streetView.zoomIn()`
