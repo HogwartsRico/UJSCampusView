@@ -149,13 +149,16 @@ var StreetView = function (container) {
         
         img.onload = function() {
             self.onImageLoadFinished();
+
             var ratio = img.width / img.height;
             
             // var maxWidth = screen.width * 2;
             canvas.width = img.width > 4096 ? 4096 : (img.width | 1) - 1;
+            console.log(img.width, img.height);
             canvas.height = canvas.width >> 1;
             
             var h = (canvas.width / ratio) >> 0, top = (canvas.height - h) >> 1;
+
             canvasContext.save();
             canvasContext.translate(canvas.width, 0);
             canvasContext.scale(-1, 1);
@@ -239,7 +242,7 @@ var StreetView = function (container) {
     }
     
     // events
-    var events = 'ImageLoad,ImageDrawFinished,ImageLoadFinished,ImageLoadError,FullscreenFailed'.split(',');
+    var events = 'ImageLoad,ImageDrawFinished,ImageLoadFinished,ImageLoadError,FullScreenFailed'.split(',');
     this.on = this.attach = function(event, handler) {
         assert(events.indexOf(event) > -1, "Unsupported event.");
         return self['on' + event] = handler || function(){}, self;
