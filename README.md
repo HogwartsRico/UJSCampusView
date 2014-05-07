@@ -1,7 +1,7 @@
 UJSCampusView - 江大街景
 ===
 
-![截图](https://raw.githubusercontent.com/ChiChou/UJSCampusView/master/UJSCampusView.jpg)
+![截图](UJSCampusView.jpg)
 
 这是一个基于 [THREE.js](http://threejs.org/) 的仿 Google 街景程序，需要浏览器和显卡支持 WEBGL。
 
@@ -11,7 +11,7 @@ UJSCampusView - 江大街景
 ---
 **由于浏览器的安全策略，本地（网址为file:///）上不能加载图片纹理。**请使用nginX / Apache / IIS 等服务器发布到 localhost 后查看。
 
-**推荐使用** Python 的简易HTTP服务器： `python -m SimpleHTTPServer`
+**推荐**使用 Python 的简易HTTP服务器： `python -m SimpleHTTPServer`
 
 图片规格
 ---
