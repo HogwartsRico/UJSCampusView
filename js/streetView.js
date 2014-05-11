@@ -108,37 +108,33 @@ var StreetView = function (container) {
     typeof(container) === "string" && (container = document.querySelector(container));
     assert(container instanceof HTMLElement, "Invalid container.");
 
-    // WEB-GL
     var camera, renderer, scene;
-    var vector3, mesh;
-    var ORIGIN = new THREE.Vector3;
 
     var overRenderer;
-    var curZoomSpeed = 0, zoomSpeed = 50;
 
     var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
     var rotation = { x: 0, y: 0 },
+		focus = { x: Math.PI, y: 0},
+		focusVector = new THREE.Vector3(),
         target = { x: Math.PI * 3 / 2, y: 0},
         targetOnDown = { x: 0, y: 0 };
 
     var yRange = Math.PI / 2, RADIUS = 1000;
     var distance = 0, distanceTarget = RADIUS / 2;
-
-    var initialized = false;
-    var self = this; // instance
+    var root = this; // instance
     
     var canvas = document.createElement("canvas"),
         canvasContext = canvas.getContext("2d"),
         texture;
     
     function toggle(image) {
-        self.onImageLoad();
-        self.image = image;
+        root.onImageLoad();
+        root.image = image;
         var img = new Image, ratio = 2;
         // canvasContext.clearRect(0, 0, canvas.width, canvas.height);
         
         img.onerror = function() {
-            self.onImageLoadError();
+            root.onImageLoadError();
             
             canvasContext.fillStyle = "#09f";
             canvasContext.font = "bold 40px Arial";
@@ -148,13 +144,13 @@ var StreetView = function (container) {
         };
         
         img.onload = function() {
-            self.onImageLoadFinished();
+            root.onImageLoadFinished();
 
             var ratio = img.width / img.height;
             
             // var maxWidth = screen.width * 2;
-            canvas.width = img.width > 4096 ? 4096 : (img.width | 1) - 1;
-            console.log(img.width, img.height);
+			canvas.width = Math.min(4096, (img.width | 1) - 1);
+            console.log("Texture loaded:", img.width, "x", img.height);
             canvas.height = canvas.width >> 1;
             
             var h = (canvas.width / ratio) >> 0, top = (canvas.height - h) >> 1;
@@ -202,7 +198,7 @@ var StreetView = function (container) {
             }
             texture.needsUpdate = true;
             // fire the event
-            self.onImageDrawFinished();
+            root.onImageDrawFinished();
         }
         img.src = image;
     }
@@ -213,20 +209,20 @@ var StreetView = function (container) {
     this.spin = function() { this.rotating = true; }
     this.stop = function() { this.rotating = false; }
     function rotate() {
-        if(self.rotating && !overRenderer) self.panRight();
+        if(root.rotating && !overRenderer) root.panRight();
     }
     
     // run
     this.view = function(image) {
         init();
-        toggle(image)
+        toggle(image);
         animate();
-        self.rotating = false;
+        root.rotating = false;
         setInterval(rotate, 100);
         return this;
     };
     
-    // toggle fullscreen
+    // toggle full screen
     this.toggleFullScreen = function(context) {
         var context = context || container;
         var doc = document;
@@ -245,28 +241,25 @@ var StreetView = function (container) {
     var events = 'ImageLoad,ImageDrawFinished,ImageLoadFinished,ImageLoadError,FullScreenFailed'.split(',');
     this.on = this.attach = function(event, handler) {
         assert(events.indexOf(event) > -1, "Unsupported event.");
-        return self['on' + event] = handler || function(){}, self;
-    }
-    // assign empty handler;
-    for(var i=0; i<events.length; i++) {
-        this.on(events[i], function(){});
-    }
-    
+        return root['on' + event] = handler || function(){}, root;
+    };
+	// assign empty handler;
+	var nullFunction = function(){};
+	for(var i=0; i<events.length; i++) {
+		root.on(events[i], nullFunction);
+	}
+	
     function init() {
-        initialized = true;
-
         var material,
             w = container.offsetWidth || window.innerWidth,
             h = container.offsetHeight || window.innerHeight;
-
+		
         canvas.width = screen.height * 2, canvas.height = screen.height;
-
-        texture || (texture = new THREE.Texture(canvas));
-        
+		
+		texture = new THREE.Texture(canvas);        
         camera = new THREE.PerspectiveCamera(30, w / h, RADIUS, RADIUS);
         camera.position.set(0, 0, 0);
-
-        vector3 = new THREE.Vector3;
+		
         scene = new THREE.Scene;
 
         // scene
@@ -277,7 +270,8 @@ var StreetView = function (container) {
         });
         
         texture.needsUpdate = true;
-        mesh = new THREE.Mesh(geometry, material);
+		
+        var mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
         
         renderer = new THREE.WebGLRenderer({antialias: true, alpha:true});
@@ -329,8 +323,7 @@ var StreetView = function (container) {
         target.x = targetOnDown.x - (mouse.x - mouseOnDown.x) * zoomDamp;
         target.y = targetOnDown.y - (mouse.y - mouseOnDown.y) * zoomDamp;
 
-        target.y = target.y > yRange ? yRange : target.y;
-        target.y = target.y < -yRange ? -yRange : target.y;
+        target.y = Math.max(Math.min(target.y, yRange), -yRange);
     }
 
     function onMouseUp(event) {
@@ -349,16 +342,17 @@ var StreetView = function (container) {
     function onMouseWheel(event) {
         event.preventDefault();
         if (overRenderer) {
-            zoom(event.wheelDeltaY * 0.3 || event.detail * -10); //Firefox
+            zoom(event.wheelDeltaY * 0.3 || event.wheelDelta * 0.3 || -event.detail);
         }
         return false;
     }
     
-    this.zoomIn = function(){return zoom(100), this};
-    this.zoomOut = function(){return zoom(-100), this};
+    this.zoomIn = function(){return zoom(10), this};
+    this.zoomOut = function(){return zoom(-10), this};
     
     var pan = function(offset) {
-      return target.x += offset * Math.log(distance) / 256, this;
+      target.x += offset * Math.log2(distance) / 64;
+	  return this;
     }
     this.panLeft = function(){return pan(1);}
     this.panRight = function(){return pan(-1);}
@@ -367,16 +361,16 @@ var StreetView = function (container) {
         var prevent = true;
         switch (event.keyCode) {
             case 38:
-                self.zoomIn();
+                root.zoomIn();
                 break;
             case 40:
-                self.zoomOut();
+                root.zoomOut();
                 break;
             case 37:
-                self.panLeft();
+                root.panLeft();
                 break;
             case 39:
-                self.panRight();
+                root.panRight();
                 break;
             default:
                 prevent = false;
@@ -391,27 +385,32 @@ var StreetView = function (container) {
     }
 
     function zoom(delta) {
+		if(!delta) {
+			return;
+		}
         distanceTarget -= delta;
-        distanceTarget = distanceTarget > RADIUS ? RADIUS : distanceTarget;
-        distanceTarget = distanceTarget < 10 ? 10 : distanceTarget;
+        distanceTarget = Math.min(distanceTarget, RADIUS >> 1);
+        distanceTarget = Math.max(distanceTarget, 0);
     }
 
     function animate() {
-        zoom(curZoomSpeed);
-
-        window.target = target;
         // static
         rotation.x += (target.x - rotation.x) * 0.1;
         rotation.y += (target.y - rotation.y) * 0.1;
         distance += (distanceTarget - distance) * 0.3;
 
-        camera.position.x = distance * Math.sin(rotation.x) * Math.cos(rotation.y);
-        camera.position.y = distance * Math.sin(rotation.y);
-        camera.position.z = distance * Math.cos(rotation.x) * Math.cos(rotation.y);
-
-        camera.lookAt(ORIGIN);
-
-        // vector3.copy(camera.position);
+		focusVector.set(		
+			Math.sin(rotation.x) * Math.cos(rotation.y),
+			Math.sin(rotation.y),
+			Math.cos(rotation.x) * Math.cos(rotation.y)
+		)
+		
+		camera.position.set(
+			distance * Math.sin(rotation.x) * Math.cos(rotation.y),
+			distance * Math.sin(rotation.y),
+			distance * Math.cos(rotation.x) * Math.cos(rotation.y)
+		);
+        camera.lookAt(focusVector);
         
         renderer.clear();
         renderer.render(scene, camera);

@@ -66,11 +66,12 @@
         return (url.hash || '#').substr(1);
       }
       
-      var streetView = street('#viewport').view(imgPath(location)).on('ImageLoad', function(){
+      var streetView = window.streetView = street('#viewport').view(imgPath(location)).on('ImageLoad', function(){
         //loading
       }).on('ImageLoadFinished', function(){
         //finished
       });
+	  
       $('nav').on('click', 'a', function(e) {
         streetView.toggle(imgPath(this));
       });
@@ -78,6 +79,7 @@
       $('#fullscreen').on('click', function(e) {
         streetView.toggleFullScreen(document.documentElement);
       });
+	  
       var interval;
       $('#control .press').on('mousedown', 'button', function(e) {
          clearInterval(interval);
