@@ -175,10 +175,8 @@ var StreetView = function (container) {
             canvasContext.drawImage(img, 0, top, canvas.width, h);
             canvasContext.restore();
             
-            // fill the blank
-            if (ratio > 2) {
-                yRange = Math.PI / ratio / 2;
-            }
+            yRange = Math.PI / 2 * (2 / ratio);
+            
             texture.needsUpdate = true;
             // fire the event
             root.onImageDrawFinished();
