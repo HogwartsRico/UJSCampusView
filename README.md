@@ -20,6 +20,7 @@ UJSCampusView - 江大街景
 
 浏览器要求
 ---
+
 目前最新版Chrome，Opera，Firefox 和 IE11 都支持 WEBGL。对于低版本的浏览器嘛，为了保证自己的体验，还是赶紧升级吧！
 
 交互
@@ -35,7 +36,7 @@ UJSCampusView - 江大街景
 
 ###构造器 Street(param)
 
-需要使用street函数。param为视图所在的容器元素，支持id、选择器、元素三种类型。
+需要使用 street 函数。param为视图所在的容器元素，支持id、选择器、元素三种类型。
 
     var streetView = street('viewport').view('img/scene.jpg');
 

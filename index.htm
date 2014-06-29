@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width">
 
   <script type="text/javascript" src="js/3rd-party/three.min.js"></script>
-  <script type="text/javascript" src="js/3rd-party/zepto.min.js"></script>
+  <script type="text/javascript" src="js/3rd-party/jquery.min.js"></script>
   
   <script type="text/javascript" src="js/streetView.js"></script>
   <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -18,7 +18,7 @@
   <header>
     <article>
       <h1><i class="iconfont tag"></i> 江苏大学校园全景</h1>
-      <p>基于HTML5 WebGL 构建，图片素材来自江苏大学官方网站，
+      <p>基于HTML5 WebGL，图片素材来自江苏大学官方网站，
       任何形式的商业使用与本演示程序作者无关。为取得最佳效果，推荐使用Chrome浏览器查看。</p>
       <p>
         <a href="https://github.com/chichou/ujscampusview">源代码</a>&nbsp;
@@ -52,7 +52,7 @@
     <p class="webgl-error">对不起，您的浏览器不支持WebGL</p>
   </div>
   
-  <div class="spinner"></div>
+  <div class="spinner" id="loading"></div>
 
   <script type="text/javascript">
     (function() {
@@ -66,10 +66,12 @@
         return (url.hash || '#').substr(1);
       }
       
-      var streetView = window.streetView = street('#viewport').view(imgPath(location)).on('ImageLoad', function(){
+      var streetView = window.streetView = street('#viewport').view(imgPath(location)).on('ImageLoad', function() {
         //loading
-      }).on('ImageLoadFinished', function(){
+        $("#loading").fadeIn();
+      }).on('ImageLoadFinished', function() {
         //finished
+        $("#loading").fadeOut();
       });
 	  
       $('nav').on('click', 'a', function(e) {
